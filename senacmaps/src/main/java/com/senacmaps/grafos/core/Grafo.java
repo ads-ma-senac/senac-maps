@@ -3,23 +3,23 @@ package com.senacmaps.grafos.core;
 import java.util.ArrayList;
 
 public class Grafo<T> {
-    private ArrayList<Vertice<T>> vertices;
-    private ArrayList<Aresta<T>> arestas;
+    private final ArrayList<Vertice<T>> vertices;
+    private final ArrayList<Aresta<T>> arestas;
 
     public Grafo() {
-        this.vertices = new ArrayList<Vertice<T>>();
-        this.arestas = new ArrayList<Aresta<T>>();
+        this.vertices = new ArrayList<>();
+        this.arestas = new ArrayList<>();
     }
 
     public void adicionarVertice(T dado) {
-        Vertice<T> novoVertice = new Vertice<T>(dado);
+        Vertice<T> novoVertice = new Vertice<>(dado);
         this.vertices.add(novoVertice);
     }
 
     public void adicionarAresta(Double peso, T dadoInicio, T dadoFim) {
         Vertice<T> inicio = this.getVertice(dadoInicio);
         Vertice<T> fim = this.getVertice(dadoFim);
-        Aresta<T> aresta = new Aresta<T>(peso, inicio, fim);
+        Aresta<T> aresta = new Aresta<>(peso, inicio, fim);
         inicio.adicionarArestaSaida(aresta);
         fim.adicionarArestaEntrada(aresta);
         this.arestas.add(aresta);
