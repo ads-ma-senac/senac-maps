@@ -1,6 +1,11 @@
 package com.senacmaps.grafos.core;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
 
 public class Grafo<T> {
     private final ArrayList<Vertice<T>> vertices;
@@ -59,4 +64,66 @@ public class Grafo<T> {
             fila.remove(0);
         }
     }
+
+    public List<String> dijkstra(T inicio, T fim) {
+        Map<Vertice<T>, Double> distancias = new HashMap<>();
+        Map<Vertice<T>, Vertice<T>> anteriores = new HashMap<>();
+        PriorityQueue<VerticeDistancia<T>> fila = new PriorityQueue<>(Comparator.comparingDouble(v -> v.distancia));
+        
+        Vertice<T> vInicio = this.getVertice(inicio);
+        
+        for (Vertice<T> v : this.vertices) {
+            distancias.put(v, Double.MAX_VALUE);
+        }
+
+        distancias.put(vInicio, 0.0);
+        fila.add(new VerticeDistancia<>(vInicio, 0.0));
+
+        while (!fila.isEmpty()) {
+            VerticeDistancia<T> atual = fila.poll();
+
+            for (Aresta<T> a : atual.getVertice().getArestasSaida()) {
+                Double novaDist = distancias.get(atual.vertice) + a.getPeso();
+
+                if (novaDist < distancias.get(a.getFim())) {
+                    distancias.put(a.getFim(), novaDist);
+                    anteriores.put(a.getFim(), atual.vertice);
+                    fila.add(new VerticeDistancia<>(a.getFim(), novaDist));
+                }
+            }
+        }
+
+        List<String> caminho = new ArrayList<>();
+        Vertice<T> vFim = this.getVertice(fim);
+
+        while (vFim != null) {
+            caminho.add(0, vFim.getDado().toString());
+            vFim = anteriores.get(vFim);
+        }
+
+        if (caminho.isEmpty()) {
+            System.out.println("Caminho não encontrado.");
+            return caminho;
+        }
+
+        System.out.println("Caminho encontrado: " + String.join(" -> ", caminho));
+        System.out.println("Distância total: " + distancias.get(this.getVertice(fim)));
+
+        return caminho;
+    }
+
+    private static class VerticeDistancia<T> {
+        Vertice<T> vertice;
+        Double distancia;
+
+        public VerticeDistancia(Vertice<T> vertice, Double distancia) {
+            this.vertice = vertice;
+            this.distancia = distancia;
+        }
+
+        public Vertice<T> getVertice() {
+            return vertice;
+        }
+    }
+
 }
