@@ -32,8 +32,8 @@ public class App {
 
         // Define os vértices de origem e destino para o cálculo do menor caminho entre
         // os vértices
-        String origem = "Portaria 1";
-        String destino = "Praça de Alimentação 2";
+        String origem = "Acadêmico";
+        String destino = "Portaria 2";
 
         // Executa o algoritmo de Dijkstra e obtém o menor caminho entre os vértices de
         // origem e destino

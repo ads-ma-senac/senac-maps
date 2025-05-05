@@ -1,7 +1,6 @@
 package com.senacmaps.grafo;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,63 +14,82 @@ public class Grafo {
     }
 
     public void adicionarAresta(String origem, String destino, int peso) {
-        Vertice vOrigem = vertices.get(origem);
-        Vertice vDestino = vertices.get(destino);
+        Vertice verticeOrigem = vertices.get(origem);
+        Vertice verticeDestino = vertices.get(destino);
 
-        if (vOrigem != null && vDestino != null) {
+        if (verticeOrigem != null && verticeDestino != null) {
             // Adiciona a aresta de origem para destino e vice-versa (grafo não direcionado)
-            vOrigem.arestas.add(new Aresta(vDestino, peso));
-            vDestino.arestas.add(new Aresta(vOrigem, peso));
+            verticeOrigem.arestas.add(new Aresta(verticeDestino, peso));
+            verticeDestino.arestas.add(new Aresta(verticeOrigem, peso));
         }
     }
 
     public void dijkstra(String origem, String destino) {
-        Map<Vertice, Integer> distancias = new HashMap<>();
-        Map<Vertice, Vertice> anteriores = new HashMap<>();
-        PriorityQueue<VerticeDistancia> fila = new PriorityQueue<>(Comparator.comparingInt(v -> v.distancia));
+        Map<Vertice, Integer> menoresDistancias = new HashMap<>();
+        Map<Vertice, Vertice> caminhoPrevio = new HashMap<>();
 
-        Vertice vInicio = vertices.get(origem);
+        // Fila de prioridade para armazenar os vértices a visitar
+        // A fila é ordenada pela distância do vértice atual
+        // A classe VerticeDistancia é usada para armazenar o vértice e sua distância
+        // A fila de prioridade garante que o vértice com a menor distância seja
+        // processado primeiro
+        // A classe Comparator é usada para comparar as distâncias dos vértices
+        PriorityQueue<VerticeDistancia> verticesAVisitar = new PriorityQueue<>();
 
-        for (Vertice v : vertices.values()) {
-            distancias.put(v, Integer.MAX_VALUE);
+        // Verifica se os vértices de origem e destino existem no grafo
+        // Se não existirem, imprime uma mensagem de erro e retorna
+        Vertice verticeInicio = vertices.get(origem);
+        Vertice verticeFim = vertices.get(destino);
+
+        if (verticeInicio == null || verticeFim == null) {
+            System.out.println("Vértice de origem ou destino não encontrado.");
+            return;
         }
 
-        distancias.put(vInicio, 0);
-        fila.add(new VerticeDistancia(vInicio, 0));
+        // Inicializa as distâncias e o mapa de vértices visitados com valores máximos
+        for (Vertice v : vertices.values()) {
+            menoresDistancias.put(v, Integer.MAX_VALUE);
+        }
 
-        while (!fila.isEmpty()) {
-            VerticeDistancia atual = fila.poll();
+        // A distância do vértice de origem para ele mesmo é 0
+        menoresDistancias.put(verticeInicio, 0);
+
+        // Adiciona o vértice de origem à fila de prioridade
+        verticesAVisitar.add(new VerticeDistancia(verticeInicio, 0));
+
+        // Enquanto houver vértices a visitar
+        while (!verticesAVisitar.isEmpty()) {
+
+            // Remove o vértice com a menor distância
+            VerticeDistancia atual = verticesAVisitar.poll();
+
+            // Atualiza as distâncias dos vizinhos
             for (Aresta a : atual.vertice.arestas) {
-                int novaDist = distancias.get(atual.vertice) + a.getPeso();
+                int novaDist = menoresDistancias.get(atual.vertice) + a.getPeso();
 
-                if (novaDist < distancias.get(a.getDestino())) {
-                    distancias.put(a.getDestino(), novaDist);
-                    anteriores.put(a.getDestino(), atual.vertice);
-                    fila.add(new VerticeDistancia(a.getDestino(), novaDist));
+                if (novaDist < menoresDistancias.get(a.getDestino())) {
+                    // Atualiza a distância e o vértice anterior
+                    menoresDistancias.put(a.getDestino(), novaDist);
+
+                    // Atualiza o caminho anterior
+                    caminhoPrevio.put(a.getDestino(), atual.vertice);
+
+                    // Adiciona o vizinho à fila de prioridade
+                    verticesAVisitar.add(new VerticeDistancia(a.getDestino(), novaDist));
                 }
             }
         }
 
         // Reconstruir o caminho
         List<String> caminho = new ArrayList<>();
-        Vertice vFim = vertices.get(destino);
 
-        while (vFim != null) {
-            caminho.add(0, vFim.getNome());
-            vFim = anteriores.get(vFim);
+        while (verticeFim != null) {
+            caminho.add(0, verticeFim.getNome());
+            verticeFim = caminhoPrevio.get(verticeFim);
         }
 
         // Imprime o menor caminho entre os vértices de origem e destino
         System.out.println("Menor caminho de " + origem + " até " + destino + ": " + caminho);
     }
 
-    private static class VerticeDistancia {
-        Vertice vertice;
-        int distancia;
-
-        public VerticeDistancia(Vertice vertice, int distancia) {
-            this.vertice = vertice;
-            this.distancia = distancia;
-        }
-    }
 }
